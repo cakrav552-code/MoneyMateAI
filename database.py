@@ -77,3 +77,39 @@ def hitung_saldo():
     saldo = pemasukan - pengeluaran
 
     return pemasukan, pengeluaran, saldo
+def dashboard():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # Total pemasukan
+    cursor.execute("""
+        SELECT COALESCE(SUM(nominal),0)
+        FROM transaksi
+        WHERE jenis='pemasukan'
+    """)
+    pemasukan = cursor.fetchone()[0]
+
+    # Total pengeluaran
+    cursor.execute("""
+        SELECT COALESCE(SUM(nominal),0)
+        FROM transaksi
+        WHERE jenis='pengeluaran'
+    """)
+    pengeluaran = cursor.fetchone()[0]
+
+    saldo = pemasukan - pengeluaran
+
+    # Pengeluaran per kategori
+    cursor.execute("""
+        SELECT kategori, SUM(nominal)
+        FROM transaksi
+        WHERE jenis='pengeluaran'
+        GROUP BY kategori
+        ORDER BY SUM(nominal) DESC
+    """)
+
+    kategori = cursor.fetchall()
+
+    conn.close()
+
+    return pemasukan, pengeluaran, saldo, kategori

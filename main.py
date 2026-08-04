@@ -13,6 +13,7 @@ from database import (
     tambah_transaksi,
     laporan_hari_ini,
     hitung_saldo,
+    dashboard,
 )
 from settings import (
     simpan_chat,
@@ -140,7 +141,23 @@ async def lihatjam(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"🕒 Jam laporan otomatis: {get_jam()}"
     )
+async def dashboard_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    pemasukan, pengeluaran, saldo, kategori = dashboard()
 
+    teks = (
+        "📊 MONEYMATE DASHBOARD\n\n"
+        f"💰 Saldo : Rp{saldo:,}\n"
+        f"📈 Pemasukan : Rp{pemasukan:,}\n"
+        f"📉 Pengeluaran : Rp{pengeluaran:,}\n\n"
+    )
+
+    if kategori:
+        teks += "📂 Pengeluaran per Kategori\n\n"
+
+        for nama, total in kategori:
+            teks += f"• {nama} : Rp{total:,}\n"
+
+    await update.message.reply_text(teks)
 
 def main():
     app = Application.builder().token(TOKEN).build()
@@ -148,6 +165,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("laporan", laporan))
     app.add_handler(CommandHandler("saldo", saldo))
+    app.add_handler(CommandHandler("dashboard", dashboard_cmd))
     app.add_handler(CommandHandler("setjam", setjam))
     app.add_handler(CommandHandler("lihatjam", lihatjam))
     app.add_handler(
