@@ -11,6 +11,7 @@ def init_db():
     CREATE TABLE IF NOT EXISTS transaksi (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         jenis TEXT NOT NULL,
+        kategori TEXT NOT NULL,
         keterangan TEXT NOT NULL,
         nominal INTEGER NOT NULL,
         tanggal TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -21,14 +22,15 @@ def init_db():
     conn.close()
 
 
-def tambah_transaksi(jenis, keterangan, nominal):
+def tambah_transaksi(jenis, kategori, keterangan, nominal):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    cursor.execute(
-        "INSERT INTO transaksi (jenis, keterangan, nominal) VALUES (?, ?, ?)",
-        (jenis, keterangan, nominal)
-    )
+    cursor.execute("""
+        INSERT INTO transaksi
+        (jenis, kategori, keterangan, nominal)
+        VALUES (?, ?, ?, ?)
+    """, (jenis, kategori, keterangan, nominal))
 
     conn.commit()
     conn.close()
@@ -56,21 +58,22 @@ def hitung_saldo():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT COALESCE(SUM(nominal),0) FROM transaksi WHERE jenis='pemasukan'"
-    )
+    cursor.execute("""
+        SELECT COALESCE(SUM(nominal),0)
+        FROM transaksi
+        WHERE jenis='pemasukan'
+    """)
     pemasukan = cursor.fetchone()[0]
 
-    cursor.execute(
-        "SELECT COALESCE(SUM(nominal),0) FROM transaksi WHERE jenis='pengeluaran'"
-    )
+    cursor.execute("""
+        SELECT COALESCE(SUM(nominal),0)
+        FROM transaksi
+        WHERE jenis='pengeluaran'
+    """)
     pengeluaran = cursor.fetchone()[0]
 
     conn.close()
 
-    return pemasukan, pengeluaran
+    saldo = pemasukan - pengeluaran
 
-
-if __name__ == "__main__":
-    init_db()
-    print("Database berhasil dibuat!")
+    return pemasukan, pengeluaran, saldo

@@ -8,19 +8,25 @@ def init_settings():
     cursor = conn.cursor()
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS settings (
+    CREATE TABLE IF NOT EXISTS pengaturan (
         id INTEGER PRIMARY KEY,
-        jam TEXT NOT NULL DEFAULT '22:00',
-        aktif INTEGER NOT NULL DEFAULT 1
+        chat_id INTEGER,
+        jam TEXT DEFAULT '22:00'
     )
     """)
 
-    cursor.execute("SELECT COUNT(*) FROM settings")
+    conn.commit()
+    conn.close()
 
-    if cursor.fetchone()[0] == 0:
-        cursor.execute(
-            "INSERT INTO settings (id, jam, aktif) VALUES (1, '22:00', 1)"
-        )
+
+def simpan_chat(chat_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT OR IGNORE INTO pengaturan (id, chat_id, jam) VALUES (1, ?, '22:00')",
+        (chat_id,)
+    )
 
     conn.commit()
     conn.close()
@@ -31,7 +37,7 @@ def set_jam(jam):
     cursor = conn.cursor()
 
     cursor.execute(
-        "UPDATE settings SET jam=? WHERE id=1",
+        "UPDATE pengaturan SET jam=? WHERE id=1",
         (jam,)
     )
 
@@ -43,41 +49,30 @@ def get_jam():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT jam FROM settings WHERE id=1")
-
-    jam = cursor.fetchone()[0]
+    cursor.execute("SELECT jam FROM pengaturan WHERE id=1")
+    data = cursor.fetchone()
 
     conn.close()
 
-    return jam
+    if data:
+        return data[0]
+
+    return "22:00"
 
 
-def set_status(status):
+def get_chat():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    cursor.execute(
-        "UPDATE settings SET aktif=? WHERE id=1",
-        (status,)
-    )
-
-    conn.commit()
-    conn.close()
-
-
-def get_status():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT aktif FROM settings WHERE id=1")
-
-    status = cursor.fetchone()[0]
+    cursor.execute("SELECT chat_id FROM pengaturan WHERE id=1")
+    data = cursor.fetchone()
 
     conn.close()
 
-    return status
+    if data:
+        return data[0]
+
+    return None
 
 
-if __name__ == "__main__":
-    init_settings()
-    print("Settings berhasil dibuat!")
+init_settings()
