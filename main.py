@@ -20,8 +20,8 @@ from settings import (
     set_jam,
     get_jam,
 )
-from scheduler import kirim_laporan
-from ai_parser import parse
+from services.scheduler import kirim_laporan
+from services.ai_parser import parse
 init_db()
 
 
