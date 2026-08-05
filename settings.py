@@ -15,6 +15,23 @@ def init_settings():
     )
     """)
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS budget (
+        id INTEGER PRIMARY KEY,
+        nominal INTEGER DEFAULT 0
+    )
+    """)
+
+    cursor.execute("""
+    INSERT OR IGNORE INTO pengaturan (id, chat_id, jam)
+    VALUES (1, NULL, '22:00')
+    """)
+
+    cursor.execute("""
+    INSERT OR IGNORE INTO budget (id, nominal)
+    VALUES (1, 0)
+    """)
+
     conn.commit()
     conn.close()
 
@@ -24,7 +41,7 @@ def simpan_chat(chat_id):
     cursor = conn.cursor()
 
     cursor.execute(
-        "INSERT OR IGNORE INTO pengaturan (id, chat_id, jam) VALUES (1, ?, '22:00')",
+        "UPDATE pengaturan SET chat_id=? WHERE id=1",
         (chat_id,)
     )
 
@@ -54,10 +71,7 @@ def get_jam():
 
     conn.close()
 
-    if data:
-        return data[0]
-
-    return "22:00"
+    return data[0] if data else "22:00"
 
 
 def get_chat():
@@ -69,10 +83,32 @@ def get_chat():
 
     conn.close()
 
-    if data:
-        return data[0]
+    return data[0] if data else None
 
-    return None
+
+def set_budget(nominal):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE budget SET nominal=? WHERE id=1",
+        (nominal,)
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def get_budget():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT nominal FROM budget WHERE id=1")
+    data = cursor.fetchone()
+
+    conn.close()
+
+    return data[0] if data else 0
 
 
 init_settings()
