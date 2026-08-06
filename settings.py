@@ -21,6 +21,17 @@ def init_settings():
         nominal INTEGER DEFAULT 0
     )
     """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS target (
+        id INTEGER PRIMARY KEY,
+        nominal INTEGER DEFAULT 0
+    )
+    """)
+
+    cursor.execute("""
+    INSERT OR IGNORE INTO target (id, nominal)
+    VALUES (1, 0)
+    """)
 
     cursor.execute("""
     INSERT OR IGNORE INTO pengaturan (id, chat_id, jam)
@@ -159,3 +170,24 @@ def get_budget():
     return data[0] if data else 0
 
 init_settings()
+def set_target(nominal):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE target SET nominal=? WHERE id=1",
+        (nominal,)
+    )
+
+    conn.commit()
+    conn.close()
+def get_target():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT nominal FROM target WHERE id=1")
+    data = cursor.fetchone()
+
+    conn.close()
+
+    return data[0] if data else 0

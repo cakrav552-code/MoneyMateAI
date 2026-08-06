@@ -19,6 +19,7 @@ from handlers.laporan import laporan
 from handlers.saldo import saldo
 from handlers.dashboard import dashboard_cmd
 from handlers.budget import budget
+from handlers.target import target
 from handlers.setting import setjam, lihatjam
 
 from services.scheduler import kirim_laporan
@@ -43,6 +44,7 @@ def main():
     app.add_handler(CommandHandler("saldo", saldo))
     app.add_handler(CommandHandler("dashboard", dashboard_cmd))
     app.add_handler(CommandHandler("budget", budget))
+    app.add_handler(CommandHandler("target", target))
     app.add_handler(CommandHandler("setjam", setjam))
     app.add_handler(CommandHandler("lihatjam", lihatjam))
 
