@@ -128,3 +128,18 @@ def total_pengeluaran():
     conn.close()
 
     return data[0] if data[0] else 0
+def riwayat(limit=10):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, jenis, keterangan, nominal
+        FROM transaksi
+        ORDER BY id DESC
+        LIMIT ?
+    """, (limit,))
+
+    data = cursor.fetchall()
+
+    conn.close()
+    return data
