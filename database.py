@@ -143,3 +143,18 @@ def riwayat(limit=10):
 
     conn.close()
     return data
+def hapus_transaksi(id_transaksi):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM transaksi WHERE id=?",
+        (id_transaksi,)
+    )
+
+    berhasil = cursor.rowcount
+
+    conn.commit()
+    conn.close()
+
+    return berhasil > 0
