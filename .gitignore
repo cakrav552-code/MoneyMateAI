@@ -1,16 +1,23 @@
+# Python
 __pycache__/
 *.pyc
 
-settings.db
-database_backup.py
-
-.env
-
-.vscode/
-
-.idea/
-
-*.log__pycache__/
-*.pyc
+# Database
 data.db
 settings.db
+
+# Backup
+backups/
+
+# Environment
+.env
+
+# Editor
+.vscode/
+.idea/
+
+# Log
+*.log
+
+# File backup source
+database_backup.py
