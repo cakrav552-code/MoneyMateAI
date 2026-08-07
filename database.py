@@ -133,7 +133,7 @@ def riwayat(limit=10):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT id, jenis, keterangan, nominal
+        SELECT id, jenis, kategori, keterangan, nominal, tanggal
         FROM transaksi
         ORDER BY id DESC
         LIMIT ?
@@ -142,7 +142,23 @@ def riwayat(limit=10):
     data = cursor.fetchall()
 
     conn.close()
+
     return data
+def edit_transaksi(id_transaksi, nominal_baru):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE transaksi SET nominal=? WHERE id=?",
+        (nominal_baru, id_transaksi)
+    )
+
+    berhasil = cursor.rowcount
+
+    conn.commit()
+    conn.close()
+
+    return berhasil > 0
 def hapus_transaksi(id_transaksi):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()

@@ -1,4 +1,16 @@
 __pycache__/
 *.pyc
+
+settings.db
+database_backup.py
+
+.env
+
+.vscode/
+
+.idea/
+
+*.log__pycache__/
+*.pyc
 data.db
 settings.db

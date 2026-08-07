@@ -13,11 +13,19 @@ async def lihat_riwayat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     teks = "🧾 10 Transaksi Terakhir\n\n"
 
-    for nomor, (id_trx, jenis, keterangan, nominal) in enumerate(data, start=1):
+    for id_trx, jenis, kategori, keterangan, nominal, tanggal in data:
         emoji = "📈" if jenis == "pemasukan" else "📉"
+        ikon = "💰" if jenis == "pemasukan" else "💸"
+
+        tanggal = tanggal[:16]
+
         teks += (
-            f"{nomor}. {emoji} {keterangan}\n"
-            f"   Rp{nominal:,}\n\n"
+            f"🆔 #{id_trx}\n"
+            f"{emoji} {kategori}\n"
+            f"📝 {keterangan}\n"
+            f"{ikon} Rp{nominal:,}\n"
+            f"📅 {tanggal}\n"
+            f"────────────\n"
         )
 
     await update.message.reply_text(teks)

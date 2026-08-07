@@ -23,6 +23,9 @@ from handlers.setting import setjam, lihatjam
 from services.scheduler import kirim_laporan
 from handlers.riwayat import lihat_riwayat
 from handlers.hapus import hapus
+from handlers.edit import edit
+from handlers.backup import backup
+from handlers.restore import restore
 def main():
     init_db()
     init_settings()
@@ -48,6 +51,9 @@ def main():
     app.add_handler(CommandHandler("setjam", setjam))
     app.add_handler(CommandHandler("lihatjam", lihatjam))
     app.add_handler(CommandHandler("hapus", hapus))
+    app.add_handler(CommandHandler("edit", edit))
+    app.add_handler(CommandHandler("backup", backup))
+    app.add_handler(CommandHandler("restore", restore))
     # Pesan biasa
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, pesan)
