@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes
 
 
 async def backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    nama_file = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
+    nama_file = nama_file = f"backups/backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
 
     shutil.copy("data.db", nama_file)
 

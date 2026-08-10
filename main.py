@@ -26,6 +26,7 @@ from handlers.hapus import hapus
 from handlers.edit import edit
 from handlers.backup import backup
 from handlers.restore import restore
+from handlers.help import help_cmd
 def main():
     init_db()
     init_settings()
@@ -42,6 +43,7 @@ def main():
 
     # Command
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_cmd))
     app.add_handler(CommandHandler("laporan", laporan))
     app.add_handler(CommandHandler("saldo", saldo))
     app.add_handler(CommandHandler("dashboard", dashboard_cmd))
