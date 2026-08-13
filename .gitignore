@@ -21,3 +21,4 @@ backups/
 
 # File backup source
 database_backup.py
+config.py

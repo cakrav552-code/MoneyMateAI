@@ -1,6 +1,6 @@
 
 from datetime import time
-
+from zoneinfo import ZoneInfo
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -8,10 +8,12 @@ from telegram.ext import (
     filters,
 )
 
-from config import TOKEN
+from telegram.request import HTTPXRequest
 
+from config import TOKEN
 from database import init_db
 from settings import init_settings, get_jam
+
 from handlers.start import start
 from handlers.transaksi import pesan
 from handlers.laporan import laporan
@@ -27,20 +29,36 @@ from handlers.edit import edit
 from handlers.backup import backup
 from handlers.restore import restore
 from handlers.help import help_cmd
+from handlers.statistik import statistik
 from handlers.export import export_data
+from handlers.ringkasan import ringkasan
+from handlers.insight import insight
+from handlers.proyeksi import proyeksi
+from handlers.bulanan import bulanan
+from handlers.peringkat import peringkat
+
 def main():
     init_db()
     init_settings()
 
+    request = HTTPXRequest(
+        http_version="1.1",
+        connect_timeout=60,
+        read_timeout=60,
+        write_timeout=60,
+        pool_timeout=60,
+        connection_pool_size=8,
+    )
     app = (
         Application.builder()
         .token(TOKEN)
-        .read_timeout(30)
-        .write_timeout(30)
-        .connect_timeout(30)
-        .pool_timeout(30)
+        .request(request)
         .build()
-)
+    )
+
+    app.job_queue.scheduler.configure(timezone=ZoneInfo("Asia/Jakarta")
+    
+    )
 
     # Command
     app.add_handler(CommandHandler("start", start))
@@ -49,6 +67,11 @@ def main():
     app.add_handler(CommandHandler("laporan", laporan))
     app.add_handler(CommandHandler("saldo", saldo))
     app.add_handler(CommandHandler("dashboard", dashboard_cmd))
+    app.add_handler(CommandHandler("ringkasan", ringkasan))
+    app.add_handler(CommandHandler("insight", insight))
+    app.add_handler(CommandHandler("proyeksi", proyeksi))
+    app.add_handler(CommandHandler("bulanan", bulanan))
+    app.add_handler(CommandHandler("peringkat", peringkat))
     app.add_handler(CommandHandler("riwayat", lihat_riwayat))
     app.add_handler(CommandHandler("budget", budget))
     app.add_handler(CommandHandler("target", target))
@@ -58,9 +81,14 @@ def main():
     app.add_handler(CommandHandler("edit", edit))
     app.add_handler(CommandHandler("backup", backup))
     app.add_handler(CommandHandler("restore", restore))
+    app.add_handler(CommandHandler("statistik", statistik))
+
     # Pesan biasa
     app.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, pesan)
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            pesan
+        )
     )
 
     # Scheduler
@@ -69,10 +97,13 @@ def main():
 
     app.job_queue.run_daily(
         kirim_laporan,
-        time=time(hour=jam_int, minute=menit_int),
+        time=time(
+            hour=jam_int,
+            minute=menit_int,
+            tzinfo=ZoneInfo("Asia/Jakarta")
+        ),
         name="laporan_harian",
     )
-
     print("🤖 MoneyMate AI berjalan...")
 
     app.run_polling()
@@ -80,3 +111,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

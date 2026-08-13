@@ -1,9 +1,12 @@
+import os
 import sqlite3
 from datetime import datetime
 
 from telegram import Update
 from telegram.ext import ContextTypes
 from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.utils import get_column_letter
 
 
 async def export_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -29,17 +32,57 @@ async def export_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ws = wb.active
     ws.title = "Transaksi"
 
-    ws.append([
+    # Header
+    headers = [
         "ID",
         "Jenis",
         "Kategori",
         "Keterangan",
         "Nominal",
         "Tanggal"
-    ])
+    ]
 
+    ws.append(headers)
+
+    # Data
     for row in data:
         ws.append(row)
+
+    # Format header
+    for cell in ws[1]:
+        cell.font = Font(bold=True)
+        cell.fill = PatternFill(
+            fill_type="solid",
+            fgColor="D9EAF7"
+        )
+        cell.alignment = Alignment(horizontal="center")
+
+    # Format nominal
+    for cell in ws["E"][1:]:
+        cell.number_format = '"Rp" #,##0'
+
+    # Filter
+    ws.auto_filter.ref = ws.dimensions
+
+    # Freeze header
+    ws.freeze_panes = "A2"
+
+    # Lebar kolom otomatis
+    for column in ws.columns:
+        max_length = 0
+        column_letter = get_column_letter(column[0].column)
+
+        for cell in column:
+            if cell.value is not None:
+                max_length = max(
+                    max_length,
+                    len(str(cell.value))
+                )
+
+        ws.column_dimensions[column_letter].width = min(
+            max_length + 2,
+            40
+        )
 
     nama_file = (
         f"MoneyMate_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
@@ -47,8 +90,13 @@ async def export_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     wb.save(nama_file)
 
-    await update.message.reply_document(
-        document=open(nama_file, "rb"),
-        filename=nama_file,
-        caption="📊 Export transaksi berhasil."
-    )
+    try:
+        with open(nama_file, "rb") as file:
+            await update.message.reply_document(
+                document=file,
+                filename=nama_file,
+                caption="📊 Export transaksi berhasil."
+            )
+    finally:
+        if os.path.exists(nama_file):
+            os.remove(nama_file)

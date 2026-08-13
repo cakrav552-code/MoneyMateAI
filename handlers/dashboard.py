@@ -4,7 +4,10 @@ from telegram.ext import ContextTypes
 from database import dashboard
 
 
-async def dashboard_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def dashboard_cmd(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
     pemasukan, pengeluaran, saldo, kategori = dashboard()
 
     teks = (
@@ -23,4 +26,3 @@ async def dashboard_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         teks += "Belum ada data pengeluaran."
 
     await update.message.reply_text(teks)
-
