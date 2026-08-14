@@ -37,6 +37,7 @@ from handlers.proyeksi import proyeksi
 from handlers.bulanan import bulanan
 from handlers.peringkat import peringkat
 from handlers.grafik import grafik
+from handlers.kategori import kategori
 
 def main():
     init_db()
@@ -74,6 +75,7 @@ def main():
     app.add_handler(CommandHandler("bulanan", bulanan))
     app.add_handler(CommandHandler("peringkat", peringkat))
     app.add_handler(CommandHandler("grafik", grafik))
+    app.add_handler(CommandHandler("kategori", kategori))
     app.add_handler(CommandHandler("riwayat", lihat_riwayat))
     app.add_handler(CommandHandler("budget", budget))
     app.add_handler(CommandHandler("target", target))
