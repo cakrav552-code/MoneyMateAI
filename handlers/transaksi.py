@@ -4,9 +4,10 @@ from telegram.error import TimedOut
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from database import tambah_transaksi, total_pengeluaran
-from settings import get_budget
+from database import tambah_transaksi, total_pengeluaran, dashboard
+from settings import get_budget, get_limits
 from services.ai_parser import parse
+
 
 async def kirim_dengan_retry(update, pesan):
     for percobaan in range(2):
@@ -20,7 +21,9 @@ async def kirim_dengan_retry(update, pesan):
             else:
                 print("❌ Gagal mengirim balasan setelah retry.")
 
+
 async def pesan(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     hasil = parse(update.message.text)
 
     if not hasil:
@@ -28,9 +31,15 @@ async def pesan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     jenis, kategori, keterangan, nominal = hasil
 
-    tambah_transaksi(jenis, kategori, keterangan, nominal)
+    tambah_transaksi(
+        jenis,
+        kategori,
+        keterangan,
+        nominal
+    )
 
     if jenis == "pengeluaran":
+
         await kirim_dengan_retry(
             update,
             f"✅ Pengeluaran dicatat!\n\n"
@@ -39,9 +48,14 @@ async def pesan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"💸 Rp{nominal:,}"
         )
 
+        # =========================
+        # CEK BUDGET
+        # =========================
+
         budget = get_budget()
 
         if budget > 0:
+
             terpakai = total_pengeluaran()
             sisa = budget - terpakai
             persen = (terpakai / budget) * 100
@@ -63,7 +77,69 @@ async def pesan(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             await kirim_dengan_retry(update, teks)
 
+        # =========================
+        # CEK LIMIT KATEGORI
+        # =========================
+
+        limits = get_limits()
+
+        for nama_limit, batas in limits:
+
+            if nama_limit.lower() == kategori.lower():
+
+                # Ambil total pengeluaran kategori
+                _, _, _, data_kategori = dashboard()
+
+                terpakai_kategori = 0
+
+                for nama, total in data_kategori:
+                    if nama.lower() == kategori.lower():
+                        terpakai_kategori = total
+                        break
+
+                if batas > 0:
+
+                    persen_limit = (
+                        terpakai_kategori / batas
+                    ) * 100
+
+                    sisa_limit = batas - terpakai_kategori
+
+                    teks_limit = (
+                        f"🚦 Limit {kategori}\n\n"
+                        f"💰 Limit : Rp{batas:,}\n"
+                        f"💸 Terpakai : Rp{terpakai_kategori:,}\n"
+                        f"💵 Sisa : Rp{max(sisa_limit, 0):,}\n"
+                        f"📊 {persen_limit:.1f}% digunakan"
+                    )
+
+                    if persen_limit >= 100:
+                        teks_limit += (
+                            "\n\n"
+                            "🔴 LIMIT KATEGORI TERLEWATI!"
+                        )
+
+                    elif persen_limit >= 90:
+                        teks_limit += (
+                            "\n\n"
+                            "🟠 Limit kategori hampir habis!"
+                        )
+
+                    elif persen_limit >= 80:
+                        teks_limit += (
+                            "\n\n"
+                            "🟡 Hati-hati, limit kategori mulai menipis."
+                        )
+
+                    await kirim_dengan_retry(
+                        update,
+                        teks_limit
+                    )
+
+                break
+
     else:
+
         await kirim_dengan_retry(
             update,
             f"✅ Pemasukan dicatat!\n\n"
@@ -71,3 +147,4 @@ async def pesan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"💰 {keterangan}\n"
             f"📈 Rp{nominal:,}"
         )
+

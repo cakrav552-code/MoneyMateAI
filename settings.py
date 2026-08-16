@@ -185,3 +185,51 @@ def get_target():
 # =========================
 
 init_settings()
+
+def set_limit(kategori, nominal):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS batas_kategori (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            kategori TEXT UNIQUE,
+            nominal INTEGER DEFAULT 0
+        )
+    """)
+
+    cursor.execute("""
+        INSERT INTO batas_kategori (kategori, nominal)
+        VALUES (?, ?)
+        ON CONFLICT(kategori)
+        DO UPDATE SET nominal=excluded.nominal
+    """, (kategori, nominal))
+
+    conn.commit()
+    conn.close()
+
+
+def get_limits():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS batas_kategori (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            kategori TEXT UNIQUE,
+            nominal INTEGER DEFAULT 0
+        )
+    """)
+
+    cursor.execute("""
+        SELECT kategori, nominal
+        FROM batas_kategori
+        ORDER BY kategori
+    """)
+
+    data = cursor.fetchall()
+
+    conn.commit()
+    conn.close()
+
+    return data
