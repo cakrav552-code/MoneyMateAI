@@ -22,7 +22,7 @@ from handlers.dashboard import dashboard_cmd
 from handlers.budget import budget
 from handlers.target import target
 from handlers.setting import setjam, lihatjam
-from services.scheduler import kirim_laporan
+from services.scheduler import kirim_laporan, kirim_reminder
 from handlers.riwayat import lihat_riwayat
 from handlers.hapus import hapus
 from handlers.edit import edit
@@ -39,6 +39,7 @@ from handlers.peringkat import peringkat
 from handlers.grafik import grafik
 from handlers.kategori import kategori
 from handlers.limit import limit
+from handlers.reminder import reminder
 
 def main():
     init_db()
@@ -78,6 +79,7 @@ def main():
     app.add_handler(CommandHandler("grafik", grafik))
     app.add_handler(CommandHandler("kategori", kategori))
     app.add_handler(CommandHandler("limit", limit))
+    app.add_handler(CommandHandler("reminder", reminder))
     app.add_handler(CommandHandler("riwayat", lihat_riwayat))
     app.add_handler(CommandHandler("budget", budget))
     app.add_handler(CommandHandler("target", target))
@@ -110,6 +112,13 @@ def main():
         ),
         name="laporan_harian",
     )
+
+    app.job_queue.run_daily(
+        kirim_reminder,
+        time=time(hour=21, minute=0),
+        name="reminder_keuangan",
+    )
+
     print("🤖 MoneyMate AI berjalan...")
 
     app.run_polling()
