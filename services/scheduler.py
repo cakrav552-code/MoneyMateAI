@@ -157,12 +157,13 @@ async def kirim_reminder(context: ContextTypes.DEFAULT_TYPE):
                 f"Kurang Rp{sisa_target:,}\n\n"
             )
 
-    if not ada_peringatan:
-        pesan += (
-            "🟢 Keuangan masih aman.\n\n"
-            "Tidak ada peringatan khusus saat ini."
-        )
-
+        if not ada_peringatan:
+            pesan += (
+                "🟢 Keuangan masih aman.\n\n"
+                "💰 Semua indikator masih dalam batas aman.\n"
+                "🚦 Budget dan limit belum mendekati batas.\n"
+                "🎯 Target tabungan masih berjalan."
+            )
     await context.bot.send_message(
         chat_id=chat_id,
         text=pesan
